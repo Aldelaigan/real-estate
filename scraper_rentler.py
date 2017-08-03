@@ -1,6 +1,6 @@
 
-# Web scraping interface test
-# using Beautiful Soup on Rentler.com
+# Scrape rental listings on rentler.com
+# using Beautiful Soup
 
 # Alec Myres
 # July 2017
@@ -9,47 +9,43 @@ from bs4 import BeautifulSoup
 import urllib, locale
 import pandas as pd
 import numpy as np
+locale.setlocale(locale.LC_ALL, 'en_US.UTF8') # price conversions
 
-# for price conversions to ints
-locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
+# ----------------------
+# Scraping functions
+# ----------------------
 
-# Parse HTML search site
-u = 'https://www.rentler.com/listings/ut/south-jordan'
-r = urllib.urlopen(u).read()
-soup = BeautifulSoup(r, "lxml")
-
-# Get pages, count
-p = soup.find_all('ul', class_ = 'pager')[0]
-p = p.contents[1]
-pStr = p.a.string
-pFirst = int(pStr.split(' ')[1])
-pLast  = int(pStr.split(' ')[3])
-
-# Get url list for pages
-urls = [u]
-for page in range(pLast + 1)[2:]:
-  u1 = u + '?page=' + str(page)
-  urls.append(u1)
-
-# Save listings
-id_list = []
-for url in urls:
+def getListingsPageCount(url):
   r = urllib.urlopen(url).read()
   soup = BeautifulSoup(r, "lxml")
-  listings = soup.find_all('li', class_ = 'listing')
-  for tag in listings:
-    id_list.append(tag['data-listingid'])
+  p = soup.find_all('ul', class_ = 'pager')[0]
+  p = p.contents[1]
+  pStr = p.a.string
+  pFirst = int(pStr.split(' ')[1])
+  pLast  = int(pStr.split(' ')[3])
+  return pLast
 
-# Listing details
-results = {}
-i = 1
-for id_num in id_list:
-  print i
-  i += 1
+def getListingPagesURLs(url, pLast):
+  urls = [url]
+  for page in range(pLast + 1)[2:]:
+    u1 = url + '?page=' + str(page)
+    urls.append(u1)
+  return urls
+
+def getListingIDs(urls):
+  id_list = []
+  for url in urls:
+    r = urllib.urlopen(url).read()
+    soup = BeautifulSoup(r, "lxml")
+    listings = soup.find_all('li', class_ = 'listing')
+    for tag in listings:
+      id_list.append(tag['data-listingid'])
+  return id_list
+
+def getListingDetails(id_num):
   u = 'https://www.rentler.com/listing/' + id_num
   r = urllib.urlopen(u).read()
   soup = BeautifulSoup(r, "lxml")
-
   price   = soup.find_all('h2'  , itemprop = 'price'          )[0].string
   address = soup.find_all('span', itemprop = 'streetAddress'  )[0].string
   city    = soup.find_all('span', itemprop = 'addressLocality')[0].string
@@ -63,14 +59,27 @@ for id_num in id_list:
   baths   = stats.find_all('div')[1].string
   year    = stats.find_all('div')[2].string
   sqft    = stats.find_all('div')[3].string
-
   price   = locale.atoi(price.strip().strip('$'))
   cat     = cat.split(' > ')[1]
+  return (price, address, city, state, zipcode, lat, lon, cat, beds, baths, year, sqft)  
 
-  results[id_num] = (price, address, city, state, zipcode,
-                      lat, lon, cat, beds, baths, year, sqft)
 
-# Results data frame
+# ----------------------
+# Main results
+# ----------------------
+
+state = 'ut'
+city  = 'south-jordan'
+url = 'https://www.rentler.com/listings/' + state + '/' + city
+
+pLast = getListingsPageCount(url)
+urls  = getListingPagesURLs(url, pLast)
+id_list = getListingIDs(urls)
+
+results = {}
+for id_num in id_list:
+  results[id_num] = getListingDetails(id_num)
+  
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
 df.rename(columns = {'index' : 'ID',
                      0  : 'Rent',
