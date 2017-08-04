@@ -6,7 +6,7 @@
 # July 2017
 
 from bs4 import BeautifulSoup
-import urllib, locale
+import urllib, locale, time
 import pandas as pd
 import numpy as np
 locale.setlocale(locale.LC_ALL, 'en_US.UTF8') # price conversions
@@ -79,6 +79,7 @@ id_list = getListingIDs(urls)
 results = {}
 for id_num in id_list:
   results[id_num] = getListingDetails(id_num)
+  time.sleep(1)
   
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
 df.rename(columns = {'index' : 'ID',
