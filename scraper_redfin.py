@@ -14,11 +14,21 @@ import selenium, time
 from selenium import webdriver
 
 # Selenium/PhantomJS test
-driver = webdriver.PhantomJS(executable_path = '/usr/local/bin/phantomjs-2.1.1-macosx/bin/phantomjs')
+driver = webdriver.PhantomJS(executable_path =
+         '/usr/local/bin/phantomjs-2.1.1-macosx/bin/phantomjs')
 driver.get('http://pythonscraping.com/pages/javascript/ajaxDemo.html')
 time.sleep(3)
 print driver.find_element_by_id('content').text
 driver.close()
+
+# Add custom HTTP headers
+zipcode = '84095'
+url = 'https://www.redfin.com/zipcode/' + zipcode
+session = requests.Session()
+headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
+           'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'}
+req = session.get(url, headers = headers)
+soup = BeautifulSoup(req.text, "lxml")
 
 
 
@@ -27,12 +37,6 @@ driver.close()
 
 # for price conversions to ints
 #locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
-
-# Parse HTML search site
-zipcode = '84095'
-u = 'https://www.redfin.com/zipcode/' + zipcode
-r = urllib.urlopen(u).read()
-soup = BeautifulSoup(r, "lxml")
 
 # Get pages, count
 p = soup.find_all('ul', class_ = 'pager')[0]
