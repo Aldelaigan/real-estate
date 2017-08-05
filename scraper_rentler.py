@@ -15,7 +15,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8') # price conversions
 # Scraping functions
 # ----------------------
 
-def getListingsPageCount(url):
+def getListingPageCount(url):
   r = urllib.urlopen(url).read()
   soup = BeautifulSoup(r, "lxml")
   p = soup.find_all('ul', class_ = 'pager')[0]
@@ -65,21 +65,21 @@ def getListingDetails(id_num):
 
 
 # ----------------------
-# Main results
+# Main Results
 # ----------------------
 
 state = 'ut'
 city  = 'south-jordan'
 url = 'https://www.rentler.com/listings/' + state + '/' + city
 
-pLast = getListingsPageCount(url)
-urls  = getListingPagesURLs(url, pLast)
+pLast   = getListingPageCount(url)
+urls    = getListingPagesURLs(url, pLast)
 id_list = getListingIDs(urls)
 
 results = {}
 for id_num in id_list:
   results[id_num] = getListingDetails(id_num)
-  time.sleep(1)
+  time.sleep(np.random.uniform(0.25,1.0))
   
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
 df.rename(columns = {'index' : 'ID',
