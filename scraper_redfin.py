@@ -26,22 +26,22 @@ import numpy as np
 # Scraping functions
 # ----------------------
 
-def getListingPagesCount(url):
+def get_listing_pages_count(url, headers):
   session = requests.Session()
   req = session.get(url, headers = headers)
   soup = BeautifulSoup(req.text, "lxml")
   t = soup.find('span', {'class':'pageText'}).text
-  pLast = int(t.split(' ')[4])
-  return pLast
+  p_last = int(t.split(' ')[4])
+  return p_last
 
-def getListingPagesURLs(url, pLast):
+def get_listing_pages_urls(url, p_last):
   urls = [url]
-  for page in range(pLast + 1)[2:]:
+  for page in range(p_last + 1)[2:]:
     u1 = url + '/page-' + str(page)
     urls.append(u1)
   return urls
 
-def getListingIDs(urls):
+def get_listing_ids(urls, headers):
   id_list = []
   for url in urls:
     time.sleep(np.random.uniform(.25, 1.0))
@@ -53,7 +53,7 @@ def getListingIDs(urls):
       id_list.append(h['href'])
   return id_list
 
-def getListingDetails(id_value):
+def get_listing_details(id_value, headers):
   time.sleep(np.random.uniform(0.25,1.0))
   url_id = 'https://www.redfin.com' + id_value
   session = requests.Session()
@@ -72,27 +72,38 @@ def getListingDetails(id_value):
   lon   = float(lon)
   facts = soup.find('div', {'class':'basic-info'})
   if facts == None:
-    cat   = ''
-    beds  = ''
-    baths = ''
-    year  = ''
-    sqft  = ''
-    lot   = ''
-    reno  = ''
+    cat   = np.nan
+    beds  = np.nan
+    baths = np.nan
+    year  = np.nan
+    sqft  = np.nan
+    lot   = np.nan
+    reno  = np.nan
   else:
     rows = facts.find_all('div', {'class':'table-row'})
     ldict = {}
     for r in rows:
       ldict[r.find('span').string] = r.find('div' ).string
-    cat   = ldict['Style']
-    beds  = ldict['Beds' ]
-    baths = ldict['Baths']
-    year  = ldict['Year Built']
-    sqft  = ldict['Finished Sq. Ft.'].replace(',','')
-    lot   = ldict['Lot Size'].strip(' Sq. Ft.').replace(',','')
-    reno  = ldict['Year Renovated']
+    cat   = ldict['Style'].replace(u'\u2014', '')
+    beds  = ldict['Beds' ].replace(u'\u2014', '')
+    baths = ldict['Baths'].replace(u'\u2014', '')
+    year  = ldict['Year Built'].replace(u'\u2014', '')
+    sqft  = ldict['Finished Sq. Ft.'].replace(u'\u2014', '').replace(',','')
+    lot   = ldict['Lot Size'].replace(u'\u2014', '')
+    lot   = acre_converter(lot)
+    reno  = ldict['Year Renovated'].replace(u'\u2014', '')
   return (price, address, city, state, zipcode, lat, lon,
           cat, beds, baths, year, sqft, lot, reno)
+
+def acre_converter(value):
+  if 'Sq. Ft.' in value:
+    v = value.strip(' Sq. Ft.').replace(',','')
+    return round(float(v)/43560.0, 2)
+  elif 'Acres' in value:
+    v = value.strip(' Acres')
+    return round(float(v),2)
+  else:
+    return value
 
 # ----------------------
 # Main Results
@@ -110,13 +121,13 @@ ac2 = 'q=0.9,image/webp,image/apng,*/*;q=0.8'
 headers = {'User-Agent' : ua1 + ua2 + ua3,
            'Accept'     : ac1 + ac2}
 
-pLast   = getListingPagesCount(url)
-urls    = getListingPagesURLs(url, pLast)
-id_list = getListingIDs(urls)
+p_last   = get_listing_pages_count(url, headers)
+urls    = get_listing_pages_urls(url, p_last)
+id_list = get_listing_ids(urls, headers)
 
 results = {}
 for id_value in id_list:
-  results[id_value] = getListingDetails(id_value)
+  results[id_value] = get_listing_details(id_value, headers)
   time.sleep(np.random.uniform(0.25,1.0))
 
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
