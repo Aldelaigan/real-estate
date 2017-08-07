@@ -96,8 +96,8 @@ def get_listing_details(id_value, headers):
     reno  = ldict['Year Renovated'    ]
     lot   = acre_converter(lot)
 
-  return (address, city, state, zipcode, lat, lon, cat,
-          beds, baths, sqft, usqft, lot, year, reno, price)
+  return (price, address, city, state, zipcode, lat, lon,
+          cat, beds, baths, sqft, usqft, lot, year, reno)
 
 def acre_converter(value):
   if 'Sq. Ft.' in value:
