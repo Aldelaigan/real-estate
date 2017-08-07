@@ -72,28 +72,32 @@ def get_listing_details(id_value, headers):
   lon   = float(lon)
   facts = soup.find('div', {'class':'basic-info'})
   if facts == None:
-    cat   = np.nan
-    beds  = np.nan
-    baths = np.nan
-    year  = np.nan
-    sqft  = np.nan
-    lot   = np.nan
-    reno  = np.nan
+    cat   = ''
+    beds  = ''
+    baths = ''
+    sqft  = ''
+    usqft = ''
+    lot   = ''
+    year  = ''
+    reno  = ''
   else:
     rows = facts.find_all('div', {'class':'table-row'})
     ldict = {}
     for r in rows:
-      ldict[r.find('span').string] = r.find('div' ).string
-    cat   = ldict['Style'].replace(u'\u2014', '')
-    beds  = ldict['Beds' ].replace(u'\u2014', '')
-    baths = ldict['Baths'].replace(u'\u2014', '')
-    year  = ldict['Year Built'].replace(u'\u2014', '')
-    sqft  = ldict['Finished Sq. Ft.'].replace(u'\u2014', '').replace(',','')
-    lot   = ldict['Lot Size'].replace(u'\u2014', '')
+      t = r.find('div' ).string.replace(u'\u2014', '')
+      ldict[r.find('span').string] = t
+    cat   = ldict['Style'             ]
+    beds  = ldict['Beds'              ]
+    baths = ldict['Baths'             ]
+    sqft  = ldict['Finished Sq. Ft.'  ].replace(',','')
+    usqft = ldict['Unfinished Sq. Ft.'].replace(',','')
+    lot   = ldict['Lot Size'          ]
+    year  = ldict['Year Built'        ]
+    reno  = ldict['Year Renovated'    ]
     lot   = acre_converter(lot)
-    reno  = ldict['Year Renovated'].replace(u'\u2014', '')
-  return (price, address, city, state, zipcode, lat, lon,
-          cat, beds, baths, year, sqft, lot, reno)
+
+  return (address, city, state, zipcode, lat, lon, cat,
+          beds, baths, sqft, usqft, lot, year, reno, price)
 
 def acre_converter(value):
   if 'Sq. Ft.' in value:
@@ -121,7 +125,7 @@ ac2 = 'q=0.9,image/webp,image/apng,*/*;q=0.8'
 headers = {'User-Agent' : ua1 + ua2 + ua3,
            'Accept'     : ac1 + ac2}
 
-p_last   = get_listing_pages_count(url, headers)
+p_last  = get_listing_pages_count(url, headers)
 urls    = get_listing_pages_urls(url, p_last)
 id_list = get_listing_ids(urls, headers)
 
@@ -132,20 +136,21 @@ for id_value in id_list:
 
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
 df.rename(columns = {'index' : 'ID',
-                     0  : 'Price',
-                     1  : 'Address',
-                     2  : 'City',
-                     3  : 'State',
-                     4  : 'ZipCode',
-                     5  : 'Latitude',
-                     6  : 'Longitude',
-                     7  : 'Category',
-                     8  : 'Beds',
-                     9  : 'Baths',
-                     10 : 'Year',
-                     11 : 'SqFt',
-                     12 : 'LotSize',
-                     13 : 'YearReno'},
+                     0  : 'Address',
+                     1  : 'City',
+                     2  : 'State',
+                     3  : 'ZipCode',
+                     4  : 'Latitude',
+                     5  : 'Longitude',
+                     6  : 'Category',
+                     7  : 'Beds',
+                     8  : 'Baths',
+                     9  : 'SqFt',
+                     10 : 'UnSqFt',
+                     11 : 'LotSize',
+                     12 : 'YearBuilt'
+                     13 : 'YearReno',
+                     14 : 'Price'},
           inplace = True)
 
 df.to_csv('redfin_' + zipcode + '.csv', encoding = 'utf-8')
