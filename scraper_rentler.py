@@ -15,46 +15,46 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF8') # price conversions
 # Scraping functions
 # ----------------------
 
-def getListingPageCount(url):
+def get_listing_page_count(url):
   r = urllib.urlopen(url).read()
   soup = BeautifulSoup(r, "lxml")
-  p = soup.find_all('ul', class_ = 'pager')[0]
+  p = soup.find('ul', {'class':'pager'})
   p = p.contents[1]
   pStr = p.a.string
   pFirst = int(pStr.split(' ')[1])
   pLast  = int(pStr.split(' ')[3])
-  return pLast
+  return p_last
 
-def getListingPagesURLs(url, pLast):
+def get_listing_pages_urls(url, p_last):
   urls = [url]
-  for page in range(pLast + 1)[2:]:
+  for page in range(p_last + 1)[2:]:
     u1 = url + '?page=' + str(page)
     urls.append(u1)
   return urls
 
-def getListingIDs(urls):
+def get_listing_ids(urls):
   id_list = []
   for url in urls:
     r = urllib.urlopen(url).read()
     soup = BeautifulSoup(r, "lxml")
-    listings = soup.find_all('li', class_ = 'listing')
+    listings = soup.find_all('li', {'class':'listing'})
     for tag in listings:
       id_list.append(tag['data-listingid'])
   return id_list
 
-def getListingDetails(id_num):
+def get_listing_details(id_num):
   u = 'https://www.rentler.com/listing/' + id_num
   r = urllib.urlopen(u).read()
   soup = BeautifulSoup(r, "lxml")
-  price   = soup.find_all('h2'  , itemprop = 'price'          )[0].string
-  address = soup.find_all('span', itemprop = 'streetAddress'  )[0].string
-  city    = soup.find_all('span', itemprop = 'addressLocality')[0].string
-  state   = soup.find_all('span', itemprop = 'addressRegion'  )[0].string
-  zipcode = soup.find_all('span', itemprop = 'postalCode'     )[0].string
-  lat     = soup.find_all('meta', itemprop = 'latitude' )[0].attrs['content']
-  lon     = soup.find_all('meta', itemprop = 'longitude')[0].attrs['content']
-  cat     = soup.find_all('meta', itemprop = 'category' )[0].attrs['content']
-  stats   = soup.find_all('table', id = 'stats')[0]
+  price   = soup.find('h2'  , itemprop = 'price'          ).string
+  address = soup.find('span', itemprop = 'streetAddress'  ).string
+  city    = soup.find('span', itemprop = 'addressLocality').string
+  state   = soup.find('span', itemprop = 'addressRegion'  ).string
+  zipcode = soup.find('span', itemprop = 'postalCode'     ).string
+  lat     = soup.find('meta', itemprop = 'latitude' ).attrs['content']
+  lon     = soup.find('meta', itemprop = 'longitude').attrs['content']
+  cat     = soup.find('meta', itemprop = 'category' ).attrs['content']
+  stats   = soup.find('table', id = 'stats')
   beds    = stats.find_all('div')[0].string
   baths   = stats.find_all('div')[1].string
   year    = stats.find_all('div')[2].string
@@ -72,13 +72,13 @@ state = 'ut'
 city  = 'south-jordan'
 url = 'https://www.rentler.com/listings/' + state + '/' + city
 
-pLast   = getListingPageCount(url)
-urls    = getListingPagesURLs(url, pLast)
-id_list = getListingIDs(urls)
+p_last  = get_listing_page_count(url)
+urls    = get_listing_pages_urls(url, p_last)
+id_list = get_listing_ids(urls)
 
 results = {}
 for id_num in id_list:
-  results[id_num] = getListingDetails(id_num)
+  results[id_num] = get_listing_details(id_num)
   time.sleep(np.random.uniform(0.25,1.0))
   
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
