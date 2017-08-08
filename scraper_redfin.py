@@ -86,16 +86,17 @@ def get_listing_details(id_value, headers):
     for r in rows:
       t = r.find('div' ).string.replace(u'\u2014', '')
       ldict[r.find('span').string] = t
-    cat   = ldict['Style'             ]
-    beds  = ldict['Beds'              ]
-    baths = ldict['Baths'             ]
-    sqft  = ldict['Finished Sq. Ft.'  ].replace(',','')
-    usqft = ldict['Unfinished Sq. Ft.'].replace(',','')
-    lot   = ldict['Lot Size'          ]
-    year  = ldict['Year Built'        ]
-    reno  = ldict['Year Renovated'    ]
+    cat   = ldict['Style'] if 'Style' in ldict else ''
+    beds  = ldict['Beds' ] if 'Beds'  in ldict else ''
+    baths = ldict['Baths'] if 'Baths' in ldict else ''
+    sqft  = ldict['Finished Sq. Ft.'  ] if 'Finished Sq. Ft.'   in ldict else ''
+    usqft = ldict['Unfinished Sq. Ft.'] if 'Unfinished Sq. Ft.' in ldict else ''
+    lot   = ldict['Lot Size'      ] if 'Lot Size'       in ldict else ''
+    year  = ldict['Year Built'    ] if 'Year Built'     in ldict else ''
+    reno  = ldict['Year Renovated'] if 'Year Renovated' in ldict else ''
+    sqft  = sqft.replace(',','')
+    usqft = usqft.replace(',','')
     lot   = acre_converter(lot)
-
   return (price, address, city, state, zipcode, lat, lon,
           cat, beds, baths, sqft, usqft, lot, year, reno)
 
@@ -106,8 +107,12 @@ def acre_converter(value):
   elif 'Acres' in value:
     v = value.strip(' Acres')
     return round(float(v),2)
+  elif ',' in value:
+    v = value.replace(',','')
+    return round(float(v)/43560.0, 2)
   else:
     return value
+
 
 # ----------------------
 # Main Results
@@ -136,21 +141,21 @@ for id_value in id_list:
 
 df = pd.DataFrame.from_dict(results, orient = 'index').reset_index()
 df.rename(columns = {'index' : 'ID',
-                     0  : 'Address',
-                     1  : 'City',
-                     2  : 'State',
-                     3  : 'ZipCode',
-                     4  : 'Latitude',
-                     5  : 'Longitude',
-                     6  : 'Category',
-                     7  : 'Beds',
-                     8  : 'Baths',
-                     9  : 'SqFt',
-                     10 : 'UnSqFt',
-                     11 : 'LotSize',
-                     12 : 'YearBuilt'
-                     13 : 'YearReno',
-                     14 : 'Price'},
+                     0  : 'Price',
+                     1  : 'Address',
+                     2  : 'City',
+                     3  : 'State',
+                     4  : 'ZipCode',
+                     5  : 'Latitude',
+                     6  : 'Longitude',
+                     7  : 'Category',
+                     8  : 'Beds',
+                     9  : 'Baths',
+                     10 : 'SqFt',
+                     11 : 'UnSqFt',
+                     12 : 'LotSize',
+                     13 : 'YearBuilt',
+                     14 : 'YearReno'},
           inplace = True)
 
 df.to_csv('redfin_' + zipcode + '.csv', encoding = 'utf-8')
