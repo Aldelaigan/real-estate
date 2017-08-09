@@ -10,17 +10,6 @@ import urllib, locale, requests, sys, time
 import pandas as pd
 import numpy as np
 
-#sys.path.append('/usr/local/lib/python2.7/site-packages') 
-#import selenium, time
-#from selenium import webdriver
-
-# Selenium/PhantomJS test
-#driver = webdriver.PhantomJS(executable_path =
-#         '/usr/local/bin/phantomjs-2.1.1-macosx/bin/phantomjs')
-#driver.get('http://pythonscraping.com/pages/javascript/ajaxDemo.html')
-#time.sleep(3)
-#print driver.find_element_by_id('content').text
-#driver.close()
 
 # ----------------------
 # Scraping functions
