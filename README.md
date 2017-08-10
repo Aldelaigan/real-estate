@@ -21,3 +21,4 @@ Some info here
 * [Requests](http://docs.python-requests.org/en/master/) - HTTP for humans
 * [Selenium](http://www.seleniumhq.org/projects/webdriver/) - Web browser automation framework
 * [PhantomJS](http://phantomjs.org/) - Headless (non-GUI) browser
+* [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) - Automated Chrome
