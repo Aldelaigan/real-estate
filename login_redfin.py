@@ -16,6 +16,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 
+# ----------------------
+# Functions
+# ----------------------
+
 def load_main_page(url, crome_path):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
@@ -103,6 +107,45 @@ def get_sale_ids(driver, urls):
                     id_list.append(sale_path)
     return id_list
 
+def get_sale_details(driver, id_value):
+    time.sleep(np.random.uniform(0.25,1.0))
+    driver.get()
+
+    top_stats = driver.find_element_by_xpath("//div[@class='top-stats']")
+    address = top_stats.find_element_by_xpath("//span[@itemprop='streetAddress']").text
+    city = top_stats.find_element_by_xpath("//span[@itemprop='addressLocality']")
+    city = city.strip(',')
+    state = top_stats.find_element_by_xpath("//span[@itemprop='addressRegion']").text
+    zipcode = top_stats.find_element_by_xpath("//span[@itemprop='postalCode']").text
+    latitude = top_stats.find_element_by_xpath("//meta[@itemprop='latitude']")
+    latitude = latitude.get_property('content')
+    longitude = top_stats.find_element_by_xpath("//meta[@itemprop='longitude']")
+    longitude = longitude.get_property('content')
+
+    facts_table = driver.find_element_by_xpath("//div[@class='facts-table']")
+    ldict = {}
+    rows = facts_table.find_elements_by_xpath("//div[@class='table-row']")
+    for row in rows:
+        key = row.find_element_by_xpath("//span[@class='table-label']").text
+        value = row.find_element_by_xpath("//div[@class='table-value']").text
+        ldict[key] = value
+
+
+#SALE TYPE
+#SOLD DATE
+#PROPERTY TYPE
+#PRICE
+#BEDS
+#BATHS
+#LOCATION
+#SQUARE FEET
+#LOT SIZE
+#YEAR BUILT
+#DAYS ON MARKET
+#$/SQUARE FEET
+#HOA/MONTH
+#STATUS
+
 # --------------------
 # MAIN
 # --------------------
@@ -116,13 +159,28 @@ email = creds['USERNAME']['Redfin']
 pword = creds['PASSWORD']['Redfin']
 driver = load_main_page(url, chrome_path)
 driver = sign_in_redfin(driver, email, pword)
+
+
 s_url  = get_sale_search_url(zipcode, months)
-p_last = get_sale_pages_count(driver, search_url)
-urls   = get_sale_pages_urls(search_url, p_last)
+p_last = get_sale_pages_count(driver, s_url)
+urls   = get_sale_pages_urls(s_url, p_last)
 id_list = get_sale_ids(driver, urls) 
 
 
-driver.get(search_url)
 
+
+ziplist = [84095, # South Jordan
+           84096, # Herriman
+           84065, # Riverton/Bluffdale
+           84088, # West Jordan (S)
+           84084, # West Jordan (N)
+           84081, # West Jordan (W)
+           84043, # Lehi
+           84003, # American Fork
+           84005, # Eagle Mountain
+           84045] # Saratoga Springs
+
+
+driver.get(search_url)
 
 driver.close()
