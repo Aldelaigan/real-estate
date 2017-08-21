@@ -58,8 +58,8 @@ def sign_in_redfin(driver, email, password):
         submit.click()
         return driver
 
+# Get url for search results, months in {3,6,12,24}
 def get_sale_search_url(zipcode, months):
-    # months = {3,6,12,24}
     url = 'https://www.redfin.com'
     z = str(zipcode)
     if months in [12,24]:
@@ -89,6 +89,7 @@ def get_sale_pages_urls(search_url, p_last):
         urls.append(u1)
     return urls
 
+# Get list of ids (individual urls)
 def get_sale_ids(driver, urls):
     id_list = []
     for url in urls:
@@ -109,42 +110,65 @@ def get_sale_ids(driver, urls):
 
 def get_sale_details(driver, id_value):
     time.sleep(np.random.uniform(0.25,1.0))
-    driver.get()
-
-    top_stats = driver.find_element_by_xpath("//div[@class='top-stats']")
-    address = top_stats.find_element_by_xpath("//span[@itemprop='streetAddress']").text
-    city = top_stats.find_element_by_xpath("//span[@itemprop='addressLocality']")
-    city = city.strip(',')
-    state = top_stats.find_element_by_xpath("//span[@itemprop='addressRegion']").text
-    zipcode = top_stats.find_element_by_xpath("//span[@itemprop='postalCode']").text
-    latitude = top_stats.find_element_by_xpath("//meta[@itemprop='latitude']")
-    latitude = latitude.get_property('content')
-    longitude = top_stats.find_element_by_xpath("//meta[@itemprop='longitude']")
+    driver.get(id_value)
+    # Location info
+    ts  = "//div[@class='top-stats']"
+    adr = "//span[@itemprop='streetAddress']"
+    cty = "//span[@itemprop='addressLocality']"
+    stt = "//span[@itemprop='addressRegion']"
+    zpc = "//span[@itemprop='postalCode']"
+    lat = "//meta[@itemprop='latitude']"
+    lon = "//meta[@itemprop='longitude']"
+    address   = driver.find_element_by_xpath(ts + adr).text
+    city      = driver.find_element_by_xpath(ts + cty).text
+    city      = city.strip(',')
+    state     = driver.find_element_by_xpath(ts + stt).text
+    zipcode   = driver.find_element_by_xpath(ts + zpc).text
+    latitude  = driver.find_element_by_xpath(ts + lat)
+    longitude = driver.find_element_by_xpath(ts + lon)
+    latitude  =  latitude.get_property('content')
     longitude = longitude.get_property('content')
-
-    facts_table = driver.find_element_by_xpath("//div[@class='facts-table']")
-    ldict = {}
-    rows = facts_table.find_elements_by_xpath("//div[@class='table-row']")
-    for row in rows:
-        key = row.find_element_by_xpath("//span[@class='table-label']").text
-        value = row.find_element_by_xpath("//div[@class='table-value']").text
-        ldict[key] = value
-
+    # House characteristics
+    ftb = "//div[@class='facts-table']//*[@class='table-row']"
+    fdict = {}
+    fact_rows = driver.find_elements_by_xpath(ftb)
+    for row in fact_rows:
+        key = row.find_element_by_class_name('table-label').text
+        value = row.find_element_by_class_name('table-value').text
+        fdict[key] = value
+    baths = fdict['Baths']
+    beds  = fdict['Beds']
+    floor = fdict['Floors']
+    style = fdict['Style']
+    sqftf = fdict['Finished Sq. Ft.'].replace(',','')
+    sqftu = fdict['Unfinished Sq. Ft.'].replace(',','')
+    sqftt = fdict['Total Sq. Ft.'].replace(',','')
+    lotsz = fdict['Lot Size']
+    yearb = fdict['Year Built']
+    yearr = fdict['Year Renovated']
+    apn   = fdict['APN']
+    # Tax assessment values
+    txb = "//div[@class='tax-table']//tr"
+    tax_rows = driver.find_elements_by_xpath(txb)
+    tdict = {}
+    for row in tax_rows:
+        key = row.find_element_by_class_name('heading').text
+        val = row.find_element_by_class_name('value'  ).text
+        tdict[key] = val
+    lnd_val = tdict['Land'     ].strip('$').replace(',','')
+    add_val = tdict['Additions'].strip('$').replace(',','')
+    tot_val = tdict['Total'    ].strip('$').replace(',','')
+    # Sale Info
+    #spx = "//div[@data-rf-test-id='abp-price']"
+    #svl = "//div[@class='statsValue']"
+    #sdt = "//span[@class='statsLabel']"
+    #price   = driver.find_element_by_xpath(ts + spx + svl).text
+    #sale_dt = driver.find_element_by_xpath(ts + spx + sdt).text
 
 #SALE TYPE
-#SOLD DATE
-#PROPERTY TYPE
-#PRICE
-#BEDS
-#BATHS
 #LOCATION
-#SQUARE FEET
-#LOT SIZE
-#YEAR BUILT
 #DAYS ON MARKET
-#$/SQUARE FEET
-#HOA/MONTH
-#STATUS
+#HOA
 
 # --------------------
 # MAIN
@@ -181,6 +205,6 @@ ziplist = [84095, # South Jordan
            84045] # Saratoga Springs
 
 
-driver.get(search_url)
 
-driver.close()
+#driver.get(search_url)
+#driver.close()
