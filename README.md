@@ -7,10 +7,14 @@ A collection of tools for real estate data analysis, web scraping, pricing, etc.
 Scraping tools for the following websites:
 * Rentler - rental listings
 * Redfin - on-market and previous sales
-* KSL
+* KSL - Utah classified
 * Craigslist
 * Zillow
 * Homie
+
+## Mapping
+
+Info here
 
 ## Modeling
 
@@ -22,3 +26,5 @@ Some info here
 * [Selenium](http://www.seleniumhq.org/projects/webdriver/) - Web browser automation framework
 * [PhantomJS](http://phantomjs.org/) - Headless (non-GUI) browser
 * [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) - Automated Chrome
+* [R](https://www.r-project.org/) - Statistical computing and graphics
+* [ggplot](https://www.rdocumentation.org/packages/ggmap/versions/2.6.1) - Spatial data and maps in R
