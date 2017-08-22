@@ -12,9 +12,17 @@ Scraping tools for the following websites:
 * Zillow
 * Homie
 
+## Cleaning
+
+Code:
+* [data_agg_redfin.py](https://github.com/alecmyres/real-estate/blob/master/data_agg_redfin.py) - Aggregate and clean bulk Redfin downloads
+
 ## Mapping
 
-Info here
+Plot geographic coordinates using R/ggplot, overlaying on Google Maps.
+
+Code:
+* [map_redfin.R](https://github.com/alecmyres/real-estate/blob/master/map_redfin.R) - Map Redfin bulk download data
 
 ## Modeling
 
