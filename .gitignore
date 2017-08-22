@@ -2,3 +2,5 @@
 .DS_Store
 *.csv
 ghostdriver.log
+.Rhistory
+*.pyc
