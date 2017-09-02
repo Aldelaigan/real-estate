@@ -5,6 +5,7 @@
 import sys, os
 import pandas as pd
 import numpy as np
+import datetime as dt
 
 files = os.listdir('redfin-data/')
 
@@ -22,18 +23,14 @@ results = results[['SOLD DATE','PROPERTY TYPE','MLS#',
                    'PRICE','BEDS','BATHS','SQUARE FEET',
                    'LOT SIZE','YEAR BUILT','DAYS ON MARKET',
                    'HOA/MONTH','LATITUDE','LONGITUDE']]
+new_cols = {'SOLD DATE'      : 'SOLD',
+            'PROPERTY TYPE'  : 'TYPE',
+            'SQUARE FEET'    : 'SQFT',
+            'LOT SIZE'       : 'LTSZ',
+            'YEAR BUILT'     : 'YEAR',
+            'DAYS ON MARKET' : 'DMKT',
+            'HOA/MONTH'      : 'HOA'}
+results.rename(columns = new_cols, inplace = True)
 
 # Save results
-results.to_csv('combined_results.csv')
-
-# TODO:
-# Data summary
-# Distribution of variables
-# Split train/test
-# - Time ordered? (last obs as test set)
-# Basic models:
-# - Guess avg.
-# - Linear on size
-# - Linear on size + lot
-# - Decision Trees/forest
-# - Other monotonic/isotonic techniques
+results.to_csv('combined_results.csv')         
