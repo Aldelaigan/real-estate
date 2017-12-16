@@ -29,7 +29,9 @@ new_cols = {'SOLD DATE'      : 'SOLD',
             'LOT SIZE'       : 'LTSZ',
             'YEAR BUILT'     : 'YEAR',
             'DAYS ON MARKET' : 'DMKT',
+            'MLS#'           : 'MLS',
             'HOA/MONTH'      : 'HOA'}
+
 results.rename(columns = new_cols, inplace = True)
 
 # Save results
